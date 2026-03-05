@@ -1,0 +1,128 @@
+{{define "title"}}Dashboard — Jukebox{{end}}
+{{define "content"}}
+<div class="app-layout">
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="vinyl-sm"></div>
+      <span>JUKEBOX</span>
+    </div>
+    <div class="header-user">
+      {{if .User.ImageURL}}<img src="{{.User.ImageURL}}" class="avatar" alt="{{.User.DisplayName}}" />{{end}}
+      <span class="user-name">{{.User.DisplayName}}</span>
+      <a href="/auth/logout" class="btn-logout">Sign out</a>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <section class="dash-hero">
+      <div class="dash-hero-text">
+        <h1>Your Jukebox</h1>
+        <p>Share the link below and let others add songs to your queue.</p>
+      </div>
+    </section>
+
+    <!-- Share Info Card -->
+    <div class="card share-card" id="share-info">
+      <div class="card-label">SHARE LINK</div>
+      <div class="share-url-row">
+        <code class="share-url" id="share-url-text">{{.ShareURL}}</code>
+        <button class="btn-copy" onclick="copyShareURL()">Copy</button>
+      </div>
+
+      <div class="card-label" style="margin-top:1.5rem">PASSCODE</div>
+      <div id="passcode-box" class="passcode-box">
+        <span id="passcode-value" class="passcode-hidden">••••••</span>
+        <button class="btn-ghost"
+          hx-get="/dashboard/passcode/toggle?show=1"
+          hx-target="#passcode-box"
+          hx-swap="outerHTML">Show</button>
+      </div>
+
+      <div class="passcode-actions">
+        <button class="btn-danger"
+          hx-post="/dashboard/passcode/regenerate"
+          hx-target="#share-info"
+          hx-swap="outerHTML"
+          hx-confirm="Regenerate passcode? Current guests will need the new code.">
+          ↺ Regenerate Passcode
+        </button>
+      </div>
+
+      <div class="card-label" style="margin-top:1.5rem">QR CODE</div>
+      <div class="qr-wrapper">
+        <img src="data:image/png;base64,{{.QRCodeB64}}" alt="QR Code" class="qr-code" />
+        <p class="qr-hint">Scan to open with passcode auto-filled</p>
+      </div>
+    </div>
+
+    <!-- Limits Card -->
+    <div class="card limits-card">
+      <div class="card-label">QUEUE LIMITS</div>
+      <form hx-post="/dashboard/limits" hx-target="#limits-feedback" hx-swap="innerHTML">
+        <label class="toggle-row">
+          <span>Enable limits</span>
+          <input type="checkbox" name="enabled" class="toggle" {{if .SharePage.Limits.Enabled}}checked{{end}} />
+        </label>
+
+        <div class="limits-fields">
+          <div class="field-group">
+            <label>Songs per window</label>
+            <input type="number" name="songs_per_window" value="{{.SharePage.Limits.SongsPerWindow}}" min="1" max="100" placeholder="e.g. 3" />
+          </div>
+          <div class="field-group">
+            <label>Window (minutes)</label>
+            <input type="number" name="window_minutes" value="{{.SharePage.Limits.WindowMinutes}}" min="1" max="1440" placeholder="e.g. 10" />
+          </div>
+          <div class="field-group">
+            <label>Max song duration (seconds, 0 = unlimited)</label>
+            <input type="number" name="max_duration_sec" value="{{.SharePage.Limits.MaxDurationSec}}" min="0" placeholder="0" />
+          </div>
+        </div>
+
+        <label class="toggle-row">
+          <span>Allow explicit content</span>
+          <input type="checkbox" name="explicit_allowed" class="toggle" {{if .SharePage.Limits.ExplicitAllowed}}checked{{end}} />
+        </label>
+
+        <div class="field-group">
+          <label>Allowed genres (comma-separated)</label>
+          <input type="text" name="genres" value="{{join .SharePage.Limits.AllowedGenres ", "}}" placeholder="e.g. pop, rock, hip-hop" />
+        </div>
+
+        <div class="field-group">
+          <label>Allowed decades (comma-separated)</label>
+          <input type="text" name="decades" value="{{join .SharePage.Limits.AllowedDecades ", "}}" placeholder="e.g. 1980s, 1990s, 2000s" />
+        </div>
+
+        {{if .Playlists}}
+        <div class="field-group">
+          <label>Restrict to playlist(s)</label>
+          <div class="playlist-list">
+            {{range .Playlists}}
+            <label class="playlist-item">
+              <input type="checkbox" name="playlists" value="{{.ID}}" />
+              {{.Name}}
+            </label>
+            {{end}}
+          </div>
+        </div>
+        {{end}}
+
+        <button type="submit" class="btn-primary">Save Limits</button>
+        <div id="limits-feedback"></div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+function copyShareURL() {
+  const url = document.getElementById('share-url-text').textContent.trim();
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+{{end}}

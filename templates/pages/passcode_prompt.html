@@ -1,0 +1,23 @@
+{{define "title"}}Enter Passcode — Jukebox{{end}}
+{{define "content"}}
+<div class="passcode-gate">
+  <div class="gate-card">
+    <div class="gate-vinyl">
+      <div class="vinyl-disc"><div class="vinyl-inner"></div></div>
+    </div>
+    <h2>Enter passcode</h2>
+    <p>You need the passcode to access {{.Owner.DisplayName}}'s Jukebox.</p>
+    {{if .PasscodeErr}}<p class="error-msg">{{.PasscodeErr}}</p>{{end}}
+    <form action="/{{.Owner.SpotifyID}}/verify" method="POST" class="passcode-form">
+      <input type="text" name="passcode"
+        maxlength="6"
+        inputmode="numeric"
+        pattern="[0-9]{6}"
+        placeholder="000000"
+        class="passcode-input"
+        autofocus />
+      <button type="submit" class="btn-primary">Enter →</button>
+    </form>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,89 @@
+{{define "title"}}{{.Owner.DisplayName}}'s Jukebox{{end}}
+{{define "content"}}
+<div class="share-layout">
+  <header class="share-header">
+    <div class="header-brand">
+      <div class="vinyl-sm"></div>
+      <span>JUKEBOX</span>
+    </div>
+    <div class="share-owner">
+      {{if .Owner.ImageURL}}<img src="{{.Owner.ImageURL}}" class="avatar-sm" />{{end}}
+      <span>{{.Owner.DisplayName}}'s queue</span>
+    </div>
+  </header>
+
+  {{if not .IsVerified}}
+  <!-- Passcode gate -->
+  <div class="passcode-gate">
+    <div class="gate-card">
+      <div class="gate-vinyl">
+        <div class="vinyl-disc">
+          <div class="vinyl-inner"></div>
+        </div>
+      </div>
+      <h2>Enter passcode</h2>
+      <p>You need the passcode to access {{.Owner.DisplayName}}'s Jukebox.</p>
+      {{if .PasscodeErr}}<p class="error-msg">{{.PasscodeErr}}</p>{{end}}
+      <form action="/{{.Owner.SpotifyID}}/verify" method="POST" class="passcode-form">
+        <input type="text" name="passcode" 
+          maxlength="6" 
+          inputmode="numeric"
+          pattern="[0-9]{6}"
+          placeholder="000000"
+          class="passcode-input"
+          autofocus />
+        <button type="submit" class="btn-primary">Enter →</button>
+      </form>
+    </div>
+  </div>
+
+  {{else}}
+  <!-- Main share page content -->
+  <main class="share-main">
+    <!-- Now Playing -->
+    <section class="share-section">
+      <div class="section-label">NOW PLAYING</div>
+      <div id="now-playing"
+        hx-get="/{{.Owner.SpotifyID}}/now-playing"
+        hx-trigger="load, every 10s"
+        hx-swap="innerHTML">
+        <div class="loading-pulse">Loading...</div>
+      </div>
+    </section>
+
+    <!-- Queue -->
+    <section class="share-section">
+      <div class="section-label">UP NEXT</div>
+      <div id="queue-list"
+        hx-get="/{{.Owner.SpotifyID}}/queue"
+        hx-trigger="load, every 15s"
+        hx-swap="innerHTML">
+        <div class="loading-pulse">Loading...</div>
+      </div>
+    </section>
+
+    <!-- Search + Add -->
+    <section class="share-section search-section">
+      <div class="section-label">ADD A SONG</div>
+      <div class="search-box">
+        <input 
+          type="text"
+          name="q"
+          id="search-input"
+          placeholder="Search for a track..."
+          class="search-input"
+          hx-get="/{{.Owner.SpotifyID}}/search"
+          hx-trigger="input changed delay:400ms, search"
+          hx-target="#search-results"
+          hx-swap="innerHTML"
+          hx-indicator="#search-spinner"
+          autocomplete="off"
+        />
+        <span id="search-spinner" class="htmx-indicator spinner-icon">⟳</span>
+      </div>
+      <div id="search-results" class="search-results-container"></div>
+    </section>
+  </main>
+  {{end}}
+</div>
+{{end}}

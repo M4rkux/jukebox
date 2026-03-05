@@ -1,0 +1,28 @@
+# Binaries
+bin/
+tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build cache
+*.test
+*.out
+
+# Environment variables
+.env
+
+# Air (hot reload) log
+build-errors.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
