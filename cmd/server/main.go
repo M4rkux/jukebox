@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/m4rkux/jukebox/internal/auth"
-	"github.com/m4rkux/jukebox/internal/handlers"
-	"github.com/m4rkux/jukebox/internal/middleware"
-	"github.com/m4rkux/jukebox/internal/store"
+	"github.com/M4rkux/jukebox/internal/auth"
+	"github.com/M4rkux/jukebox/internal/handlers"
+	"github.com/M4rkux/jukebox/internal/middleware"
+	"github.com/M4rkux/jukebox/internal/store"
 )
 
 func main() {

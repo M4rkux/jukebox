@@ -14,10 +14,10 @@ import (
 	"github.com/skip2/go-qrcode"
 	"golang.org/x/oauth2"
 
-	"github.com/m4rkux/jukebox/internal/auth"
-	"github.com/m4rkux/jukebox/internal/models"
-	spotifyclient "github.com/m4rkux/jukebox/internal/spotify"
-	"github.com/m4rkux/jukebox/internal/store"
+	"github.com/M4rkux/jukebox/internal/auth"
+	"github.com/M4rkux/jukebox/internal/models"
+	spotifyclient "github.com/M4rkux/jukebox/internal/spotify"
+	"github.com/M4rkux/jukebox/internal/store"
 )
 
 // Config holds handler dependencies
