@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yourusername/jukebox/internal/models"
+	"github.com/m4rkux/jukebox/internal/models"
 )
 
 // Store defines the interface for data persistence

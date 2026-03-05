@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/yourusername/jukebox/internal/auth"
+	"github.com/m4rkux/jukebox/internal/auth"
 )
 
 // Session injects session info without requiring auth

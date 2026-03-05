@@ -1,4 +1,4 @@
-module github.com/yourusername/jukebox
+module github.com/m4rkux/jukebox
 
 go 1.22
 
