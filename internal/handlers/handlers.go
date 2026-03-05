@@ -205,8 +205,6 @@ func (h *Handler) HandleRoot(w http.ResponseWriter, r *http.Request) {
 		h.HandleSearch(w, r, username)
 	case "add":
 		h.HandleAddToQueue(w, r, username)
-	case "remove":
-		h.HandleRemoveFromQueue(w, r, username)
 	default:
 		http.NotFound(w, r)
 	}
@@ -673,66 +671,12 @@ func (h *Handler) HandleAddToQueue(w http.ResponseWriter, r *http.Request, usern
 	gs.AddedAt = append(gs.AddedAt, time.Now())
 	h.cfg.Store.SaveGuestSession(gs)
 
-	// Return success with remove button
+	// Return success
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprintf(w, `
 <div class="add-result success" id="track-action-%s">
   <span>✓ Added to queue</span>
-  <button class="btn-remove" 
-    hx-post="/%s/remove" 
-    hx-vals='{"track_uri":"%s","guest_id":"%s"}'
-    hx-target="#track-action-%s"
-    hx-swap="outerHTML">Remove</button>
-</div>`, trackID, username, trackURI, guestID, trackID)
-}
-
-func (h *Handler) HandleRemoveFromQueue(w http.ResponseWriter, r *http.Request, username string) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	guestID, _, ok := h.requireGuestOrOwner(w, r, username)
-	if !ok {
-		return
-	}
-
-	r.ParseForm()
-	trackURI := r.FormValue("track_uri")
-
-	// Remove from guest session record
-	gs, err := h.cfg.Store.GetGuestSessionsByOwner(username, guestID)
-	if err != nil || gs == nil {
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, `<div class="error-toast">⚠ Could not find your session</div>`)
-		return
-	}
-
-	// Check if this guest actually added this track
-	found := false
-	newTracks := []string{}
-	newTimes := []time.Time{}
-	for i, t := range gs.AddedTracks {
-		if t == trackURI && !found {
-			found = true
-			continue
-		}
-		newTracks = append(newTracks, t)
-		newTimes = append(newTimes, gs.AddedAt[i])
-	}
-
-	if !found {
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, `<div class="error-toast">⚠ You can only remove songs you added</div>`)
-		return
-	}
-
-	gs.AddedTracks = newTracks
-	gs.AddedAt = newTimes
-	h.cfg.Store.SaveGuestSession(gs)
-
-	// Note: Spotify doesn't have a remove-from-queue API, we just track it locally
-	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, `<div class="add-result removed"><span>Removed from queue</span></div>`)
+</div>`, trackID)
 }
 
 // ── Template helpers ──────────────────────────────────────────────────────────
@@ -764,9 +708,9 @@ func durationStr(ms int) string {
 }
 
 func renderNowPlaying(w http.ResponseWriter, track models.Track, isPlaying bool, progressMs int) {
-	playIcon := "▶"
+	playIcon := "▌▌"
 	if isPlaying {
-		playIcon = "▌▌"
+		playIcon = "▶"
 	}
 	artists := strings.Join(track.Artists, ", ")
 	progressPct := 0
@@ -811,16 +755,6 @@ func renderQueue(w http.ResponseWriter, queue []spotifyclient.TrackObject, guest
 		}
 		track := trackFromSpotify(&item)
 		artists := strings.Join(track.Artists, ", ")
-		canRemove := addedByGuest[track.URI]
-		removeBtn := ""
-		if canRemove {
-			removeBtn = fmt.Sprintf(`
-<button class="btn-remove-queue" 
-  hx-post="/%s/remove"
-  hx-vals='{"track_uri":"%s"}'
-  hx-target="closest li"
-  hx-swap="outerHTML">✕</button>`, username, template.HTMLEscapeString(track.URI))
-		}
 		fmt.Fprintf(w, `
 <li class="queue-item">
   <span class="queue-num">%d</span>
@@ -830,9 +764,8 @@ func renderQueue(w http.ResponseWriter, queue []spotifyclient.TrackObject, guest
     <div class="queue-artist">%s</div>
   </div>
   <span class="queue-dur">%s</span>
-  %s
 </li>`, i+1, track.AlbumImage, template.HTMLEscapeString(track.Name),
-			template.HTMLEscapeString(artists), durationStr(track.DurationMs), removeBtn)
+			template.HTMLEscapeString(artists), durationStr(track.DurationMs))
 	}
 	fmt.Fprint(w, `</ul>`)
 }

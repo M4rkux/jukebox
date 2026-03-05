@@ -10,7 +10,7 @@ A Go + HTMX web app that lets you share your Spotify queue with others via a pas
 - **Passcode management** — show/hide, regenerate any time
 - **Live now-playing + queue** — auto-refreshes every 10–15 seconds
 - **Song search** — debounced, live results
-- **Add to queue** — guests can add; they can remove only what they added
+- **Add to queue** — guests can add
 - **Rate limiting** — e.g., 1 song per minute per guest
 - **Content filters** — explicit toggle, max duration, allowed genres, decades, playlists
 
@@ -97,7 +97,6 @@ jukebox/
 1. Open the share link (passcode auto-fills from URL, or enter manually)
 2. See the owner's now-playing track and queue
 3. Search for songs and add them to the queue
-4. Remove songs you added (before they play)
 
 ### Passcode Security
 
